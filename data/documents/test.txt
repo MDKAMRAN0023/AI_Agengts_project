@@ -1,0 +1,4 @@
+This is my first Agentic RAG Copilot document.
+
+Agentic RAG can retrieve relevant information from documents
+and use an LLM to generate an answer.

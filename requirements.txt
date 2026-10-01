@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+langgraph
+mcp
+langchain-core
+langchain-community
+langchain-huggingface
+langchain-text-splitters
+sentence-transformers
+transformers
+pinecone
+psycopg[binary]
+redis
+tavily-python
+python-dotenv

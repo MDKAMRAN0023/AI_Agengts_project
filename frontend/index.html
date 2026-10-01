@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic RAG Copilot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+```
+<div class="app">
+
+    <header class="header">
+        <h1>Agentic RAG Copilot</h1>
+        <p>AI-powered Agentic RAG Assistant</p>
+    </header>
+
+    <main class="chat-container">
+
+        <div id="chat-box" class="chat-box">
+
+            <div class="message bot-message">
+                <strong>Copilot:</strong>
+                <p>Hello! Ask me anything.</p>
+            </div>
+
+        </div>
+
+        <div class="input-area">
+
+            <input
+                type="text"
+                id="question"
+                placeholder="Ask your question..."
+                autocomplete="off"
+            >
+
+            <button id="send-btn" onclick="askQuestion()">
+                Ask
+            </button>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+
+    // =========================
+    // FASTAPI URL
+    // =========================
+
+    const API_URL = "http://127.0.0.1:8000";
+
+
+    // =========================
+    // SESSION ID
+    // =========================
+
+    let sessionId = localStorage.getItem("session_id");
+
+    if (!sessionId) {
+
+        sessionId = crypto.randomUUID();
+
+        localStorage.setItem(
+            "session_id",
+            sessionId
+        );
+    }
+
+    console.log("Session ID:", sessionId);
+
+
+    // =========================
+    // ASK QUESTION
+    // =========================
+
+    async function askQuestion() {
+
+        const questionInput =
+            document.getElementById("question");
+
+        const chatBox =
+            document.getElementById("chat-box");
+
+        const sendButton =
+            document.getElementById("send-btn");
+
+        const question =
+            questionInput.value.trim();
+
+
+        if (!question) {
+            return;
+        }
+
+
+        // =========================
+        // USER MESSAGE
+        // =========================
+
+        const userMessage =
+            document.createElement("div");
+
+        userMessage.className =
+            "message user-message";
+
+        userMessage.innerHTML = `
+            <strong>You:</strong>
+            <p>${question}</p>
+        `;
+
+        chatBox.appendChild(userMessage);
+
+
+        // =========================
+        // THINKING MESSAGE
+        // =========================
+
+        const botMessage =
+            document.createElement("div");
+
+        botMessage.className =
+            "message bot-message";
+
+        botMessage.innerHTML = `
+            <strong>Copilot:</strong>
+            <p>Thinking...</p>
+        `;
+
+        chatBox.appendChild(botMessage);
+
+
+        questionInput.value = "";
+        sendButton.disabled = true;
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+
+        try {
+
+            console.log(
+                "Sending request to:",
+                API_URL + "/ask"
+            );
+
+
+            const response =
+                await fetch(
+                    API_URL + "/ask",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            question: question,
+                            session_id: sessionId
+                        })
+                    }
+                );
+
+
+            console.log(
+                "Response status:",
+                response.status
+            );
+
+
+            if (!response.ok) {
+
+                const errorText =
+                    await response.text();
+
+                throw new Error(
+                    "API request failed: " +
+                    response.status +
+                    " " +
+                    errorText
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+            console.log(
+                "API response:",
+                data
+            );
+
+
+            botMessage.innerHTML = `
+                <strong>Copilot:</strong>
+                <p>${data.answer}</p>
+            `;
+
+
+        } catch (error) {
+
+            console.error(
+                "Fetch error:",
+                error
+            );
+
+            botMessage.innerHTML = `
+                <strong>Copilot:</strong>
+                <p>Error: ${error.message}</p>
+            `;
+
+        } finally {
+
+            sendButton.disabled = false;
+
+            chatBox.scrollTop =
+                chatBox.scrollHeight;
+        }
+
+    }
+
+
+    // =========================
+    // ENTER KEY
+    // =========================
+
+    document
+        .getElementById("question")
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Enter") {
+                    askQuestion();
+                }
+
+            }
+        );
+
+</script>
+```
+
+</body>
+
+</html>
+
+
