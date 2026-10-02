@@ -176,7 +176,7 @@ def ask_question(question):
 
     response = llm(
         prompt,
-        max_new_tokens=30,
+        max_new_tokens=100,
         do_sample=False,
         temperature=None
     )
